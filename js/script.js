@@ -8,10 +8,34 @@ const backgroundVideoSources = [
       .filter((source) => Boolean(source))
   ),
 ];
+const lastBackgroundVideoKey = "presenca-digital:last-background-video";
+let lastBackgroundVideo = null;
 let backgroundLoadId = 0;
+
+try {
+  lastBackgroundVideo = window.localStorage.getItem(lastBackgroundVideoKey);
+} catch (error) {
+  console.warn("Não foi possível consultar o último vídeo de fundo.", error);
+}
+
+function getRandomBackgroundVideo() {
+  const candidates = backgroundVideoSources.filter(
+    (source) => source !== lastBackgroundVideo
+  );
+  const availableSources = candidates.length > 0 ? candidates : backgroundVideoSources;
+  const randomIndex = Math.floor(Math.random() * availableSources.length);
+  return availableSources[randomIndex];
+}
 
 function setBackgroundVideo(source) {
   if (!siteBackgroundVideo || !source) return;
+
+  lastBackgroundVideo = source;
+  try {
+    window.localStorage.setItem(lastBackgroundVideoKey, source);
+  } catch (error) {
+    console.warn("Não foi possível salvar o último vídeo de fundo.", error);
+  }
 
   const loadId = ++backgroundLoadId;
   const showBackground = () => {
@@ -42,8 +66,7 @@ function setBackgroundVideo(source) {
 }
 
 if (backgroundVideoSources.length > 0) {
-  const randomIndex = Math.floor(Math.random() * backgroundVideoSources.length);
-  setBackgroundVideo(backgroundVideoSources[randomIndex]);
+  setBackgroundVideo(getRandomBackgroundVideo());
 } else {
   console.error("Não há vídeos configurados para o fundo do site.");
 }

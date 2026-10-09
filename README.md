@@ -10,7 +10,7 @@ O site usa HTML, CSS e JavaScript, sem depender do PHP para ser servido.
 
 - `index.html`: página do site.
 - `css/styles.css`: estilos da página.
-- `js/script.js`: controles dos vídeos e interações.
+- `js/script.js`: controles, interações e sorteio aleatório do vídeo de fundo sem repetir o da visita anterior.
 - `videos/`: vídeos em MP4 1080p, preservando a duração dos arquivos de origem.
 
 ## Publicar com Netlify
