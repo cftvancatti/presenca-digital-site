@@ -2,6 +2,51 @@ const themeCards = document.querySelectorAll(".theme-card");
 const videos = document.querySelectorAll("video");
 const siteHeader = document.querySelector(".site-header");
 const siteBackgroundVideo = document.querySelector(".hero-background-video");
+const backgroundVideoSources = [
+  ...new Set(
+    Array.from(themeCards, (card) => card.querySelector(".theme-video")?.dataset.video)
+      .filter((source) => Boolean(source))
+  ),
+];
+let backgroundLoadId = 0;
+
+function setBackgroundVideo(source) {
+  if (!siteBackgroundVideo || !source) return;
+
+  const loadId = ++backgroundLoadId;
+  const showBackground = () => {
+    if (loadId === backgroundLoadId) {
+      siteBackgroundVideo.style.opacity = "1";
+    }
+  };
+
+  siteBackgroundVideo.style.opacity = "0";
+  siteBackgroundVideo.addEventListener("loadeddata", showBackground, { once: true });
+  siteBackgroundVideo.addEventListener(
+    "error",
+    () => {
+      showBackground();
+      console.error("Falha ao carregar o vídeo de fundo:", source);
+    },
+    { once: true }
+  );
+  siteBackgroundVideo.src = source;
+  siteBackgroundVideo.load();
+  siteBackgroundVideo.play().catch((error) => {
+    if (error.name === "NotAllowedError") {
+      console.warn("O navegador bloqueou a reprodução automática do vídeo de fundo.");
+    } else if (error.name !== "AbortError") {
+      console.error("Não foi possível reproduzir o vídeo de fundo.", error);
+    }
+  });
+}
+
+if (backgroundVideoSources.length > 0) {
+  const randomIndex = Math.floor(Math.random() * backgroundVideoSources.length);
+  setBackgroundVideo(backgroundVideoSources[randomIndex]);
+} else {
+  console.error("Não há vídeos configurados para o fundo do site.");
+}
 
 function setSelectedTheme(card) {
   if (!card || !siteBackgroundVideo) return;
@@ -17,7 +62,6 @@ function setSelectedTheme(card) {
     if (!isSelected && video) {
       video.pause();
       item.dataset.userPaused = "false";
-      item.dataset.inViewport = "false";
     }
   });
 
@@ -28,21 +72,7 @@ function setSelectedTheme(card) {
   card.dataset.userPaused = "false";
   card.dataset.inViewport = "true";
   playVideo(selectedVideo);
-
-  siteBackgroundVideo.style.opacity = "0";
-
-  const onVideoReady = () => {
-    requestAnimationFrame(() => {
-      siteBackgroundVideo.style.opacity = "1";
-    });
-  };
-
-  siteBackgroundVideo.addEventListener("loadeddata", onVideoReady, { once: true });
-  siteBackgroundVideo.src = selectedVideo.dataset.video;
-  siteBackgroundVideo.load();
-  siteBackgroundVideo.play().catch(() => {
-    // A reprodução automática pode ser bloqueada até a interação do usuário.
-  });
+  setBackgroundVideo(selectedVideo.dataset.video);
 }
 
 videos.forEach((video) => {
@@ -133,7 +163,10 @@ themeCards.forEach((card) => {
   });
 
   card.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
+    if (
+      event.target === card &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
       event.preventDefault();
       setSelectedTheme(card);
     }

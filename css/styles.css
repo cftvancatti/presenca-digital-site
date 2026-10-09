@@ -4,8 +4,8 @@
   --muted: #a6afbc;
   --accent: #a9b7c8;
   --accent-deep: #52647b;
-  --background-zoom-start: 1.38;
-  --background-zoom-end: 1.08;
+  --background-zoom-start: 1.04;
+  --background-zoom-end: 1;
   --font: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
@@ -217,7 +217,7 @@ a {
   z-index: 0;
   object-fit: cover;
   opacity: 1;
-  filter: saturate(0.9) brightness(0.9);
+  filter: saturate(1.05) contrast(1.08) brightness(0.96);
   transform: scale(var(--background-zoom-start));
   transform-origin: center;
   transition: opacity 700ms ease, transform 1200ms ease;
